@@ -17,11 +17,21 @@ package com.example.android.datafrominternet;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.example.android.datafrominternet.utilities.NetworkUtils;
+
+import java.net.URL;
+
 public class MainActivity extends AppCompatActivity {
 
+    final static String GITHUB_BASE_URI = "https://api.github.com/search/repositories";
+    final static String PARAM_QUERY = "q";
+    final static String PARAM_SORT = "sort";
     EditText mSearchBoxEditText;
     TextView mUrlDisplayTextView;
     TextView mSearchResultsTextView;
@@ -34,5 +44,34 @@ public class MainActivity extends AppCompatActivity {
         mSearchBoxEditText = (EditText) findViewById(R.id.et_search_box);
         mUrlDisplayTextView = (TextView) findViewById(R.id.tv_url_display);
         mSearchResultsTextView = (TextView) findViewById(R.id.tv_github_search_results_json);
+    }
+
+    /**
+     * Method that creates the search URL and displays in the url textview
+     */
+    void makeGithubSearchQuery() {
+        if (TextUtils.isEmpty(mSearchBoxEditText.getText().toString())) {
+            mSearchBoxEditText.setError("Please Enter a Search Query");
+            return;
+        }
+        String searchQuery = mSearchBoxEditText.getText().toString();
+        URL repoSearchUrl = NetworkUtils.buildUrl(searchQuery);
+        mUrlDisplayTextView.setText(repoSearchUrl.toString());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemThatWasClickedId = item.getItemId();
+        if (itemThatWasClickedId == R.id.action_search) {
+            makeGithubSearchQuery();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

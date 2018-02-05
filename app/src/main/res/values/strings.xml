@@ -18,4 +18,5 @@
     <string name="your_search_query_text">Your search query</string>
     <string name="your_search_url_text">Your search URL</string>
     <string name="search_tv_text">Enter the search term in the search box above</string>
+    <string name="search_menu_item">search</string>
 </resources>
