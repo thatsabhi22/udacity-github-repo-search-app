@@ -19,4 +19,5 @@
     <string name="your_search_url_text">Your search URL</string>
     <string name="search_tv_text">Enter the search term in the search box above</string>
     <string name="search_menu_item">search</string>
+    <string name="response_error_message">Error fetching Result</string>
 </resources>

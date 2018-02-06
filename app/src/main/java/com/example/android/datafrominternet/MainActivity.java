@@ -25,18 +25,28 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.datafrominternet.utilities.NetworkUtils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
-    EditText mSearchBoxEditText;
-    TextView mUrlDisplayTextView;
-    TextView mSearchResultsTextView;
+    private EditText mSearchBoxEditText;
+
+    private TextView mUrlDisplayTextView;
+
+    private TextView mSearchResultsTextView;
+
+    private TextView mErrorDisplayTextView;
+
+    private ProgressBar progressBar;
 
     /**
      * Method to hide keyboard after the user has provided the search query
@@ -62,6 +72,9 @@ public class MainActivity extends AppCompatActivity {
         mSearchBoxEditText = (EditText) findViewById(R.id.et_search_box);
         mUrlDisplayTextView = (TextView) findViewById(R.id.tv_url_display);
         mSearchResultsTextView = (TextView) findViewById(R.id.tv_github_search_results_json);
+        mErrorDisplayTextView = (TextView) findViewById(R.id.tv_error_message_display);
+        progressBar = (ProgressBar) findViewById(R.id.pb_loading_indicator);
+        progressBar.setIndeterminate(true);
     }
 
     /**
@@ -82,6 +95,16 @@ public class MainActivity extends AppCompatActivity {
         hideKeyboard(this);
     }
 
+    void showJsonDataView() {
+        mSearchResultsTextView.setVisibility(View.VISIBLE);
+        mErrorDisplayTextView.setVisibility(View.INVISIBLE);
+    }
+
+    void showErrorMessage() {
+        mSearchResultsTextView.setVisibility(View.INVISIBLE);
+        mErrorDisplayTextView.setVisibility(View.VISIBLE);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
@@ -92,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemThatWasClickedId = item.getItemId();
         if (itemThatWasClickedId == R.id.action_search) {
+            mSearchResultsTextView.setText("");
             makeGithubSearchQuery();
             return true;
         }
@@ -99,6 +123,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public class GithubQueryTask extends AsyncTask<URL, Void, String> {
+
+        @Override
+        protected void onPreExecute() {
+            progressBar.setVisibility(View.VISIBLE);
+        }
 
         @Override
         protected String doInBackground(URL... urls) {
@@ -115,8 +144,20 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String githubSearchResults) {
+
+            String prettyString = "";
+            progressBar.setVisibility(View.INVISIBLE);
             if (!TextUtils.isEmpty(githubSearchResults)) {
-                mSearchResultsTextView.setText(githubSearchResults);
+                showJsonDataView();
+                try {
+                    int spacesToIndentEachLevel = 2;
+                    prettyString = new JSONObject(githubSearchResults).toString(spacesToIndentEachLevel);
+                } catch (JSONException ex) {
+                    ex.printStackTrace();
+                }
+                mSearchResultsTextView.setText(prettyString);
+            } else {
+                showErrorMessage();
             }
         }
     }
